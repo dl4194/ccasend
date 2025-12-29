@@ -1,0 +1,86 @@
+*{
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: #FFFFFF;
+}
+
+h1,span,button{
+    font-family: Montserrat, Helvetica, sans-serif;
+    text-align: center;
+    font-weight: 700;
+    margin: 0;
+}
+h1 {
+    font-size: 12vw;
+}
+span{
+    font-size: 4vw;
+}
+button{
+    border: 0.4vw solid #FFFFFF;
+    /* width: 7vw;
+    height: 4vw; */
+    background-color: #000000;
+    font-size: 2vw;
+    padding: 0.5vw;
+    transition: transform 0.1s ease;
+    cursor: pointer;
+}
+button:active {
+    transform: scale(0.95);
+}
+
+
+body {
+    margin: 0;
+    background-color: #000000;
+    height: 100vh;
+}
+
+.flexc{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#main{
+    gap: 1vh;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.hcontainer{
+    gap: 2vw;
+    flex-direction: row;
+}
+
+.pcontainer {
+    width: 30vw;
+    height: 2vw;
+    border: 0.4vw solid #FFFFFF;
+    padding: 0.4vw;
+    background-color: #000000;
+}
+
+.pbar {
+    height: 100%;
+    width: 0%;
+    background-color: #FFFFFF;
+}
+
+#time{
+    flex-direction: row;
+    gap: 0;
+}
+
+#entireprogress{
+    display: none;
+}
+
+#credit {
+    opacity: 0.6;
+    position: fixed;
+    bottom: 1vw;
+    left: 1vw;
+    font-size: 1.2vw;
+    pointer-events: none;
+}
