@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Countdown</title>
+    <title>ccasend</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" type="module" defer></script>
 
@@ -15,16 +15,17 @@
     <link rel="manifest" href="favicon/site.webmanifest" />
 </head>
 <body>
-    <div id="main">
-        <h1 id="time">syncing...</h1>
+    <div id="main" class="flexc">
+        <h1 id="time" class="flexc">syncing...</h1>
         <span>until next semester</span>
-        <div class="hcontainer">
+        <div class="hcontainer flexc" style="gap: 1vw;">
+            <button id="change">Change unit</button>
+            <button id="progresstoggle">Enable progress bar</button>
+        </div>
+        <div class="hcontainer flexc" id="entireprogress">
             <div class="pcontainer"><div id="progress" class="pbar"></div></div>
             <span id="pbarp">0%</span>
         </div>
     </div>
-    <footer>
-        made by @dl4194 on discord
-    </footer>
 </body>
 </html>
