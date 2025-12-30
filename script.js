@@ -13,9 +13,27 @@ async function getAccurateUtcBaseMsWorldTimeAPI() {
     // add half RTT to compensate network delay
     return data.unixtime * 1000 + rtt * 0.5;
 }
+async function getAccurateUtcBaseMsPythonAnywhere() {
+    const t0 = performance.now();
+
+    const res = await fetch("https://dl4194.pythonanywhere.com/time", {
+        cache: "no-store",
+        signal: AbortSignal.timeout(3000)
+    });
+    const data = await res.text();
+
+    const t1 = performance.now();
+    const rtt = t1 - t0;
+
+    // actually gives in ms
+    // add half RTT to compensate network delay
+    return Number(data) + rtt * 0.5;
+}
 async function getAccurateUtcBaseMs(){
     // return getAccurateUtcBaseMsWorldTimeAPI();
-    return Date.now();
+    // return Date.now();
+    // return getAccurateUtcBaseMsPythonAnywhere();
+    return await getAccurateUtcBaseMsPythonAnywhere();
 }
 
 function KST_alt(year,month,day,hour,min,sec){
@@ -27,10 +45,6 @@ function KST(year,month,day,hour,min,sec){
 }
 
 function formatDurationApprox(ms) {
-    if(ms<=0){
-        return `<h1 style="color: #FF0000">0s</h1>`;
-    }
-
     const units = [
         { name: "y",ms: 365.2425 * 86400000,color: "#FF0000"},
         { name: "mth",ms: 365.2425 * 86400000 / 12,color: "#ffff00"},
@@ -39,6 +53,12 @@ function formatDurationApprox(ms) {
         { name: "m", ms: 60000,color: "#00FF00"},
         { name: "s", ms: 1000,color: "#FF0000"}
     ];
+
+    if(ms<=0){
+        return `<h1 style="color: #FF0000">0s</h1>`;
+    }else if(ms>0 && ms<1000){
+        return `<h1 style="color: #FF0000">${(ms/1000).toFixed(3)}s</h1>`;
+    }
 
     let result = [];
     for (let i=0;i<units.length;i++) {
@@ -51,7 +71,7 @@ function formatDurationApprox(ms) {
         }
     }
 
-    const formatted = result.join(" ");
+    const formatted = result.join('');
     return formatted;
 }
 
@@ -64,12 +84,13 @@ const pbar = document.getElementById("progress");
 const percentd = document.getElementById("pbarp");
 const unitBtn = document.getElementById("change");
 const progressBtn = document.getElementById("progresstoggle");
+// const resyncBtn = document.getElementById("resync");
 const entireProgress = document.getElementById("entireprogress");
 const buttons = document.getElementById("buttons");
 
 let displayMode = 6;
-let baseUtcMs = await getAccurateUtcBaseMs();
-let basePerfMs = performance.now();
+let baseUtcMs;
+let basePerfMs;
 let isSyncing = false;
 let prevText;
 let prevPercent;
@@ -84,19 +105,26 @@ function setProgress(percent) {
     percentd.textContent = percent.toString() + "%";
 }
 
-async function resyncTime(){
+async function resyncTime() {
+    if (isSyncing) return;
     isSyncing = true;
-    output.textContent = "syncing...";
 
-    baseUtcMs = await getAccurateUtcBaseMs();
-    basePerfMs = performance.now();
-
-    isSyncing = false;
+    try {
+        output.textContent = "syncing...";
+        baseUtcMs = await getAccurateUtcBaseMs();
+        basePerfMs = performance.now();
+    } catch (e) {
+        console.error(e);
+        baseUtcMs = Date.now();
+        basePerfMs = performance.now();
+    } finally {
+        isSyncing = false;
+    }
 }
 
 function formatTime(ms){
-    if(ms<0){
-        ms = 0;
+    if(ms<=0){
+        return `<h1 style="color: #FF0000">It's time</h1>`;
     }
     switch (displayMode) {
         case 0:
@@ -149,10 +177,10 @@ progressBtn.addEventListener('click',function(){
     isProgressEnabled = !isProgressEnabled;
     if(isProgressEnabled){
         entireProgress.style.display = "flex";
-        progressBtn.textContent = "Disable progress bar";
+        progressBtn.textContent = "Hide progress bar";
     }else{
         entireProgress.style.display = "none";
-        progressBtn.textContent = "Enable progress bar";
+        progressBtn.textContent = "Show progress bar";
     }
 });
 output.addEventListener('click',function(){
@@ -163,12 +191,19 @@ output.addEventListener('click',function(){
         buttons.style.display = "flex";
     }
 });
+// resyncBtn.addEventListener('click',resyncTime);
+document.addEventListener("visibilitychange", function(){
+    if (!document.hidden) {
+        resyncTime();
+    }
+});
 
+await resyncTime();
 update(true);
 
 //debug
 document.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !isSyncing) {
+    if (e.key === "Enter") {
         resyncTime();
     }
 });
