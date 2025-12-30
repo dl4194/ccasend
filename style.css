@@ -29,7 +29,6 @@ button:active {
     transform: scale(0.95);
 }
 
-
 body {
     margin: 0;
     background-color: #000000;
@@ -77,10 +76,9 @@ body {
 }
 
 #credit {
-    opacity: 0.6;
     position: fixed;
     bottom: 1vw;
     left: 1vw;
     font-size: 1.2vw;
-    pointer-events: none;
+    color: #7f7f7f;
 }
