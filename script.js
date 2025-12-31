@@ -1,17 +1,16 @@
-async function getAccurateUtcBaseMsWorldTimeAPI() {
+async function getAccurateUtcBaseMsUnixSh() {
     const t0 = performance.now();
 
-    const res = await fetch("https://worldtimeapi.org/api/timezone/Etc/UTC", {
-        cache: "no-store"
+    const res = await fetch("https://unixtime.sh/api", {
+        cache: "no-store",
+        signal: AbortSignal.timeout(3000)
     });
     const data = await res.json();
 
     const t1 = performance.now();
     const rtt = t1 - t0;
 
-    // worldtimeapi gives seconds resolution
-    // add half RTT to compensate network delay
-    return data.unixtime * 1000 + rtt * 0.5;
+    return Number(data.unix.milliseconds) + rtt * 0.5;
 }
 async function getAccurateUtcBaseMsPythonAnywhere() {
     const t0 = performance.now();
@@ -30,16 +29,20 @@ async function getAccurateUtcBaseMsPythonAnywhere() {
     return Number(data) + rtt * 0.5;
 }
 async function getAccurateUtcBaseMs(){
-    // return getAccurateUtcBaseMsWorldTimeAPI();
-    // return Date.now();
-    // return getAccurateUtcBaseMsPythonAnywhere();
-    return await getAccurateUtcBaseMsPythonAnywhere();
+    const functions = [getAccurateUtcBaseMsUnixSh,getAccurateUtcBaseMsPythonAnywhere,Date.now];
+    for(const f of functions){
+        try{
+            return await Promise.resolve(f());
+        }catch(err){
+            console.error(err);
+        }
+    }
+    throw new Error("Failed to fetch time");
 }
 
 function KST_alt(year,month,day,hour,min,sec){
     return Date.UTC(year,month-1,day,hour,min,sec) - 9 * 60 * 60 * 1000;
 }
-
 function KST(year,month,day,hour,min,sec){
     return Date.UTC(year,month-1,day,hour-9,min,sec);
 }
@@ -84,7 +87,6 @@ const pbar = document.getElementById("progress");
 const percentd = document.getElementById("pbarp");
 const unitBtn = document.getElementById("change");
 const progressBtn = document.getElementById("progresstoggle");
-// const resyncBtn = document.getElementById("resync");
 const entireProgress = document.getElementById("entireprogress");
 const buttons = document.getElementById("buttons");
 
@@ -108,24 +110,21 @@ function setProgress(percent) {
 async function resyncTime() {
     if (isSyncing) return;
     isSyncing = true;
+    output.textContent = "syncing...";
 
-    try {
-        output.textContent = "syncing...";
-        baseUtcMs = await getAccurateUtcBaseMs();
-        basePerfMs = performance.now();
-    } catch (e) {
-        console.error(e);
-        baseUtcMs = Date.now();
-        basePerfMs = performance.now();
-    } finally {
-        isSyncing = false;
-    }
+    baseUtcMs = await getAccurateUtcBaseMs();
+    basePerfMs = performance.now();
+
+    isSyncing = false;
 }
 
 function formatTime(ms){
     if(ms<=0){
         return `<h1 style="color: #FF0000">It's time</h1>`;
+    }else if(ms<=1000*30){
+        return formatDurationApprox(ms);
     }
+    
     switch (displayMode) {
         case 0:
             return `${(ms / 1000).toFixed(3)}s`;
@@ -189,12 +188,6 @@ output.addEventListener('click',function(){
         buttons.style.display = "none";
     }else{
         buttons.style.display = "flex";
-    }
-});
-// resyncBtn.addEventListener('click',resyncTime);
-document.addEventListener("visibilitychange", function(){
-    if (!document.hidden) {
-        resyncTime();
     }
 });
 
