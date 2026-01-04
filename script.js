@@ -3,7 +3,7 @@ async function getAccurateUtcBaseMsUnixSh() {
 
     const res = await fetch("https://unixtime.sh/api", {
         cache: "no-store",
-        signal: AbortSignal.timeout(3000)
+        signal: AbortSignal.timeout(500)
     });
     const data = await res.json();
 
@@ -17,7 +17,7 @@ async function getAccurateUtcBaseMsPythonAnywhere() {
 
     const res = await fetch("https://dl4194.pythonanywhere.com/time", {
         cache: "no-store",
-        signal: AbortSignal.timeout(3000)
+        signal: AbortSignal.timeout(500)
     });
     const data = await res.text();
 
@@ -39,11 +39,10 @@ async function getAccurateUtcBaseMs(){
     }
     throw new Error("Failed to fetch time");
 }
-
-function KST_alt(year,month,day,hour,min,sec){
+function KST(year,month,day,hour,min,sec){
     return Date.UTC(year,month-1,day,hour,min,sec) - 9 * 60 * 60 * 1000;
 }
-function KST(year,month,day,hour,min,sec){
+function KST_alt(year,month,day,hour,min,sec){
     return Date.UTC(year,month-1,day,hour-9,min,sec);
 }
 
@@ -59,7 +58,7 @@ function formatDurationApprox(ms) {
 
     if(ms<=0){
         return `<h1 style="color: #FF0000">0s</h1>`;
-    }else if(ms>0 && ms<1000){
+    }else if(ms>0 && ms<=1000*30){
         return `<h1 style="color: #FF0000">${(ms/1000).toFixed(3)}s</h1>`;
     }
 
@@ -85,19 +84,14 @@ const DURATION = TARGET - START;
 const output = document.getElementById("time");
 const pbar = document.getElementById("progress");
 const percentd = document.getElementById("pbarp");
-const unitBtn = document.getElementById("change");
-const progressBtn = document.getElementById("progresstoggle");
-const entireProgress = document.getElementById("entireprogress");
-const buttons = document.getElementById("buttons");
+const entireprogress = document.getElementById("entirep");
 
-let displayMode = 6;
 let baseUtcMs;
 let basePerfMs;
 let isSyncing = false;
 let prevText;
 let prevPercent;
-let isProgressEnabled = false;
-let isButtonHidden = false;
+let isProgressEnabled = true;
 
 function setProgress(percent) {
     if (percent < 0) percent = 0;
@@ -106,44 +100,23 @@ function setProgress(percent) {
     pbar.style.width = percent.toString() + "%";
     percentd.textContent = percent.toString() + "%";
 }
-
 async function resyncTime() {
     if (isSyncing) return;
     isSyncing = true;
     output.textContent = "syncing...";
+    percentd.textContent = "syncing...";
 
     baseUtcMs = await getAccurateUtcBaseMs();
     basePerfMs = performance.now();
 
     isSyncing = false;
 }
-
 function formatTime(ms){
     if(ms<=0){
         return `<h1 style="color: #FF0000">It's time</h1>`;
-    }else if(ms<=1000*30){
-        return formatDurationApprox(ms);
     }
-    
-    switch (displayMode) {
-        case 0:
-            return `${(ms / 1000).toFixed(3)}s`;
-        case 1:
-            return `${(ms / (1000 * 60)).toFixed(3)}m`;
-        case 2:
-            return `${(ms / (1000 * 60 * 60)).toFixed(3)}h`;
-        case 3:
-            return `${(ms / (1000 * 60 * 60 * 24)).toFixed(3)}d`;
-        case 4:
-            return `${(ms / (1000 * 60 * 60 * 24 * 7)).toFixed(3)}wk`;
-        case 5:
-            return `${(ms / (1000 * 60 * 60 * 24 * 365.2425 / 12)).toFixed(3)}mth`;
-        case 6:
-            return formatDurationApprox(ms);
-    }
-    return "";
+    return formatDurationApprox(ms);
 }
-
 function update(forceRefresh) {
     if(isSyncing){
         setTimeout(update,20,true);
@@ -168,26 +141,12 @@ function update(forceRefresh) {
         update(false);
     });
 }
-
-unitBtn.addEventListener('click',function(){
-    displayMode = (displayMode+1) % 7;
-});
-progressBtn.addEventListener('click',function(){
+output.addEventListener('click',function(){
     isProgressEnabled = !isProgressEnabled;
     if(isProgressEnabled){
-        entireProgress.style.display = "flex";
-        progressBtn.textContent = "Hide progress bar";
+        entireprogress.style.display = 'flex';
     }else{
-        entireProgress.style.display = "none";
-        progressBtn.textContent = "Show progress bar";
-    }
-});
-output.addEventListener('click',function(){
-    isButtonHidden = !isButtonHidden;
-    if(isButtonHidden){
-        buttons.style.display = "none";
-    }else{
-        buttons.style.display = "flex";
+        entireprogress.style.display = 'none';
     }
 });
 

@@ -10,7 +10,7 @@ h1,span,button{
     margin: 0;
 }
 h1 {
-    font-size: 12vw;
+    font-size: 14vw;
 }
 span{
     font-size: 4vw;
@@ -69,10 +69,6 @@ body {
 #time{
     flex-direction: row;
     gap: 0;
-}
-
-#entireprogress{
-    display: none;
 }
 
 #credit {
