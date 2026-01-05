@@ -77,7 +77,7 @@ function formatDurationApprox(ms) {
     return formatted;
 }
 
-const TARGET = KST(2026,1,19,8,25,0);
+const TARGET = KST(2026,1,19,8,30,0);
 const START = KST(2025,12,22,4,20,0);
 const DURATION = TARGET - START;
 
@@ -91,15 +91,9 @@ let basePerfMs;
 let isSyncing = false;
 let prevText;
 let prevPercent;
+let prevPercentDisplay;
 let isProgressEnabled = true;
 
-function setProgress(percent) {
-    if (percent < 0) percent = 0;
-    if (percent > 100) percent = 100;
-
-    pbar.style.width = percent.toString() + "%";
-    percentd.textContent = percent.toString() + "%";
-}
 async function resyncTime() {
     if (isSyncing) return;
     isSyncing = true;
@@ -117,9 +111,14 @@ function formatTime(ms){
     }
     return formatDurationApprox(ms);
 }
+function animateTimeChange() {
+    output.classList.remove("time-anim");
+    void output.offsetHeight;
+    output.classList.add("time-anim");
+}
 function update(forceRefresh) {
     if(isSyncing){
-        setTimeout(update,20,true);
+        setTimeout(function(){update(true);},100);
         return;
     }
     const nowUtcMs = baseUtcMs + (performance.now() - basePerfMs);
@@ -128,13 +127,22 @@ function update(forceRefresh) {
     if(formattedTime != prevText || forceRefresh){
         output.innerHTML = formattedTime;
         prevText = formattedTime;
+        animateTimeChange();
     }
 
     const elapsedMs = DURATION - diffMs;
-    const percentPassed = (elapsedMs / DURATION) * 100;
-    if(percentPassed.toFixed(3) != prevPercent || forceRefresh){
-        setProgress(percentPassed.toFixed(3));
-        prevPercent = percentPassed.toFixed(3);
+    const percentPassed = Math.min(((elapsedMs / DURATION) * 100),100);
+
+    const displayPercentPassed = Math.trunc(percentPassed);
+    if(displayPercentPassed != prevPercentDisplay || forceRefresh){
+        pbar.style.width = `${displayPercentPassed}%`;
+        prevPercentDisplay = displayPercentPassed;
+    }
+
+    const textPercentPassed = percentPassed.toFixed(3);
+    if(textPercentPassed != prevPercent || forceRefresh){
+        percentd.textContent = `${textPercentPassed}%`;
+        prevPercent = textPercentPassed;
     }
 
     requestAnimationFrame(function(){
