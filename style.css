@@ -8,9 +8,11 @@ h1,span,button{
     text-align: center;
     font-weight: 700;
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
 }
 h1 {
-    font-size: 14vw;
+    font-size: 12vw;
 }
 span{
     font-size: 4vw;
@@ -27,6 +29,19 @@ button{
 }
 button:active {
     transform: scale(0.95);
+}
+
+.time-anim {
+    animation: pop 0.1s ease-out;
+}
+
+@keyframes pop {
+    0% {
+        transform: translateY(3vh);
+    }
+    100% {
+        transform: translateY(0);
+    }
 }
 
 body {
@@ -64,6 +79,7 @@ body {
     height: 100%;
     width: 0%;
     background-color: #FFFFFF;
+    transition: width 0.3s ease-out;
 }
 
 #time{
