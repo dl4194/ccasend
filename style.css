@@ -3,6 +3,9 @@
     color: #FFFFFF;
 }
 
+.noselect{
+    user-select: none;
+}
 h1,span,button{
     font-family: Montserrat, Helvetica, sans-serif;
     text-align: center;
@@ -32,7 +35,7 @@ button:active {
 }
 
 .time-anim {
-    animation: pop 0.1s ease-out;
+    animation: pop 0.2s ease-out;
 }
 
 @keyframes pop {
@@ -85,6 +88,11 @@ body {
 #time{
     flex-direction: row;
     gap: 0;
+    transition: transform 0.1s ease;
+    cursor: pointer;
+}
+#time:active{
+    transform: scale(0.95);
 }
 
 #credit {
