@@ -3,7 +3,7 @@ async function getAccurateUtcBaseMsUnixSh() {
 
     const res = await fetch("https://unixtime.sh/api", {
         cache: "no-store",
-        signal: AbortSignal.timeout(500)
+        signal: AbortSignal.timeout(1000)
     });
     const data = await res.json();
 
@@ -17,7 +17,7 @@ async function getAccurateUtcBaseMsPythonAnywhere() {
 
     const res = await fetch("https://dl4194.pythonanywhere.com/time", {
         cache: "no-store",
-        signal: AbortSignal.timeout(500)
+        signal: AbortSignal.timeout(1000)
     });
     const data = await res.text();
 
@@ -79,6 +79,8 @@ function formatDurationApprox(ms) {
 
 const TARGET = KST(2026,1,19,8,30,0);
 const START = KST(2025,12,22,4,20,0);
+// const TARGET = Date.now()+1000*60;
+// const START = Date.now();
 const DURATION = TARGET - START;
 
 const output = document.getElementById("time");
@@ -89,9 +91,9 @@ const entireprogress = document.getElementById("entirep");
 let baseUtcMs;
 let basePerfMs;
 let isSyncing = false;
-let prevText;
-let prevPercent;
-let prevPercentDisplay;
+let prevText = null;
+let prevPercent = null;
+let prevPercentDisplay = null;
 let isProgressEnabled = true;
 
 async function resyncTime() {
@@ -99,6 +101,7 @@ async function resyncTime() {
     isSyncing = true;
     output.textContent = "syncing...";
     percentd.textContent = "syncing...";
+    pbar.style.width = `0%`;
 
     baseUtcMs = await getAccurateUtcBaseMs();
     basePerfMs = performance.now();
@@ -115,6 +118,9 @@ function animateTimeChange() {
     output.classList.remove("time-anim");
     void output.offsetHeight;
     output.classList.add("time-anim");
+
+    const audio = new Audio('tick.mp3');
+    audio.play();
 }
 function update(forceRefresh) {
     if(isSyncing){
@@ -127,13 +133,15 @@ function update(forceRefresh) {
     if(formattedTime != prevText || forceRefresh){
         output.innerHTML = formattedTime;
         prevText = formattedTime;
-        animateTimeChange();
+        if(diffMs>30000){
+            animateTimeChange();
+        }
     }
 
     const elapsedMs = DURATION - diffMs;
     const percentPassed = Math.min(((elapsedMs / DURATION) * 100),100);
 
-    const displayPercentPassed = Math.trunc(percentPassed);
+    const displayPercentPassed = Math.round(percentPassed);
     if(displayPercentPassed != prevPercentDisplay || forceRefresh){
         pbar.style.width = `${displayPercentPassed}%`;
         prevPercentDisplay = displayPercentPassed;
