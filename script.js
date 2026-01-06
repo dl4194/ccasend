@@ -118,9 +118,6 @@ function animateTimeChange() {
     output.classList.remove("time-anim");
     void output.offsetHeight;
     output.classList.add("time-anim");
-
-    const audio = new Audio('tick.mp3');
-    audio.play();
 }
 function update(forceRefresh) {
     if(isSyncing){
