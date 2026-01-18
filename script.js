@@ -3,7 +3,7 @@ async function getAccurateUtcBaseMsUnixSh() {
 
     const res = await fetch("https://unixtime.sh/api", {
         cache: "no-store",
-        signal: AbortSignal.timeout(1000)
+        signal: AbortSignal.timeout(800)
     });
     const data = await res.json();
 
@@ -17,7 +17,7 @@ async function getAccurateUtcBaseMsPythonAnywhere() {
 
     const res = await fetch("https://dl4194.pythonanywhere.com/time", {
         cache: "no-store",
-        signal: AbortSignal.timeout(1000)
+        signal: AbortSignal.timeout(800)
     });
     const data = await res.text();
 
@@ -49,7 +49,7 @@ function KST_alt(year,month,day,hour,min,sec){
 function formatDurationApprox(ms) {
     const units = [
         { name: "y",ms: 365.2425 * 86400000,color: "#FF0000"},
-        { name: "mth",ms: 365.2425 * 86400000 / 12,color: "#ffff00"},
+        { name: "mth",ms: 365.2425 * 86400000 / 12,color: "#0000FF"},
         { name: "d",ms: 86400000,color: "#ff9100"},
         { name: "h",ms: 3600000,color: "#0000FF"},
         { name: "m", ms: 60000,color: "#00FF00"},
@@ -77,25 +77,42 @@ function formatDurationApprox(ms) {
     return formatted;
 }
 
-const TARGET = KST(2026,1,19,8,30,0);
-const START = KST(2025,12,22,4,20,0);
+const DATES = [
+    {t: KST(2026,1,19,9,0,0),untilthen: "until school starts",s: KST(2025,12,22,4,20,0)},
+    {t: KST(2026,6,5,4,20,0),untilthen: "until break",s: KST(2026,1,19,9,0,0)}
+];
+
+let TARGET = KST(2026,1,19,8,30,0);
+let START = KST(2025,12,22,4,20,0);
 // const TARGET = Date.now()+1000*60;
 // const START = Date.now();
-const DURATION = TARGET - START;
+let DURATION = TARGET - START;
 
 const output = document.getElementById("time");
 const pbar = document.getElementById("progress");
 const percentd = document.getElementById("pbarp");
 const entireprogress = document.getElementById("entirep");
+const until = document.getElementById("untilthen");
 
-let baseUtcMs;
-let basePerfMs;
+let baseUtcMs = 0;
+let basePerfMs = 0;
 let isSyncing = false;
 let prevText = null;
 let prevPercent = null;
 let prevPercentDisplay = null;
 let isProgressEnabled = true;
 
+function setTARGET(tnow){
+    for(const date of DATES){
+        if(tnow<date.t){
+            TARGET = date.t;
+            START = date.s;
+            until.textContent = date.untilthen;
+            DURATION = date.t - date.s;
+            return;
+        }
+    }
+}
 async function resyncTime() {
     if (isSyncing) return;
     isSyncing = true;
@@ -125,7 +142,12 @@ function update(forceRefresh) {
         return;
     }
     const nowUtcMs = baseUtcMs + (performance.now() - basePerfMs);
-    const diffMs = TARGET - nowUtcMs;
+    let diffMs = TARGET - nowUtcMs;
+    if(diffMs<=0){
+        setTARGET(nowUtcMs);
+        diffMs = TARGET - nowUtcMs;
+    }
+
     const formattedTime = formatTime(diffMs);
     if(formattedTime != prevText || forceRefresh){
         output.innerHTML = formattedTime;
@@ -164,6 +186,7 @@ output.addEventListener('click',function(){
 });
 
 await resyncTime();
+setTARGET(baseUtcMs + (performance.now() - basePerfMs));
 update(true);
 
 //debug
