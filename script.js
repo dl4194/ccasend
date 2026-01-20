@@ -49,7 +49,7 @@ function KST_alt(year,month,day,hour,min,sec){
 function formatDurationApprox(ms) {
     const units = [
         { name: "y",ms: 365.2425 * 86400000,color: "#FF0000"},
-        { name: "mth",ms: 365.2425 * 86400000 / 12,color: "#0000FF"},
+        // { name: "mth",ms: 365.2425 * 86400000 / 12,color: "#0000FF"},
         { name: "d",ms: 86400000,color: "#ff9100"},
         { name: "h",ms: 3600000,color: "#0000FF"},
         { name: "m", ms: 60000,color: "#00FF00"},
@@ -118,10 +118,12 @@ async function resyncTime() {
     isSyncing = true;
     output.textContent = "syncing...";
     percentd.textContent = "syncing...";
+    until.textContent = "until ---";
     pbar.style.width = `0%`;
 
     baseUtcMs = await getAccurateUtcBaseMs();
     basePerfMs = performance.now();
+    setTARGET(baseUtcMs + (performance.now() - basePerfMs));
 
     isSyncing = false;
 }
@@ -186,7 +188,6 @@ output.addEventListener('click',function(){
 });
 
 await resyncTime();
-setTARGET(baseUtcMs + (performance.now() - basePerfMs));
 update(true);
 
 //debug
