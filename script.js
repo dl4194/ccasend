@@ -77,11 +77,16 @@ function formatDurationApprox(ms) {
     return formatted;
 }
 
-const DATES = [
+const normalDATES = [
     {t: KST(2026,1,19,9,0,0),untilthen: "until school starts",s: KST(2025,12,22,4,20,0)},
     {t: KST(2026,6,5,4,20,0),untilthen: "until break",s: KST(2026,1,19,9,0,0)}
 ];
+const examDATES = [
+    {t: KST(2026,1,19,9,0,0),untilthen: "until schooll starts",s: KST(2025,12,22,4,20,0)},
+    {t: KST(2026,6,5,4,20,0),untilthen: "until breakk",s: KST(2026,1,19,9,0,0)}
+];
 
+let DATES = normalDATES;
 let TARGET = KST(2026,1,19,8,30,0);
 let START = KST(2025,12,22,4,20,0);
 // const TARGET = Date.now()+1000*60;
@@ -102,6 +107,9 @@ let prevPercent = null;
 let prevPercentDisplay = null;
 let isProgressEnabled = true;
 
+function updateSetDATES(){
+    
+}
 function setTARGET(tnow){
     for(const date of DATES){
         if(tnow<date.t){
@@ -185,6 +193,9 @@ output.addEventListener('click',function(){
     }else{
         entireprogress.style.display = 'none';
     }
+});
+until.addEventListener('click',function(){
+    if(DATES==examDATES){DATES=normalDATES;updateSet}
 });
 
 await resyncTime();
