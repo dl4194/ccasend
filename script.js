@@ -29,7 +29,7 @@ async function getAccurateUtcBaseMsPythonAnywhere() {
     return Number(data) + rtt * 0.5;
 }
 async function getAccurateUtcBaseMs(){
-    const functions = [getAccurateUtcBaseMsUnixSh,getAccurateUtcBaseMsPythonAnywhere,Date.now];
+    const functions = [getAccurateUtcBaseMsUnixSh,Date.now];
     for(const f of functions){
         try{
             return await Promise.resolve(f());
@@ -77,21 +77,16 @@ function formatDurationApprox(ms) {
     return formatted;
 }
 
-const normalDATES = [
-    {t: KST(2026,1,19,9,0,0),untilthen: "until school starts",s: KST(2025,12,22,4,20,0)},
-    {t: KST(2026,6,5,4,20,0),untilthen: "until break",s: KST(2026,1,19,9,0,0)}
-];
-const examDATES = [
-    {t: KST(2026,1,19,9,0,0),untilthen: "until schooll starts",s: KST(2025,12,22,4,20,0)},
-    {t: KST(2026,6,5,4,20,0),untilthen: "until breakk",s: KST(2026,1,19,9,0,0)}
+const DATES = [
+    {t: KST(2026,1,19,9,0,0),untilthen: "until school starts",s: KST(2025,12,22,4,0,0)},
+    {t: KST(2026,6,4,4,0,0),untilthen: "until break",s: KST(2026,1,19,9,0,0)}
 ];
 
-let DATES = normalDATES;
-let TARGET = KST(2026,1,19,8,30,0);
-let START = KST(2025,12,22,4,20,0);
+let TARGET;
+let START;
 // const TARGET = Date.now()+1000*60;
 // const START = Date.now();
-let DURATION = TARGET - START;
+let DURATION;
 
 const output = document.getElementById("time");
 const pbar = document.getElementById("progress");
@@ -107,9 +102,6 @@ let prevPercent = null;
 let prevPercentDisplay = null;
 let isProgressEnabled = true;
 
-function updateSetDATES(){
-    
-}
 function setTARGET(tnow){
     for(const date of DATES){
         if(tnow<date.t){
@@ -193,9 +185,6 @@ output.addEventListener('click',function(){
     }else{
         entireprogress.style.display = 'none';
     }
-});
-until.addEventListener('click',function(){
-    if(DATES==examDATES){DATES=normalDATES;updateSet}
 });
 
 await resyncTime();
