@@ -80,8 +80,8 @@ function formatDurationApprox(ms) {
 }
 
 const DATES = [
-    {t: KST(2026,1,19,9,0,0),untilthen: "until school starts",s: KST(2025,12,22,4,0,0)},
-    {t: KST(2026,6,4,4,0,0),untilthen: "until break",s: KST(2026,1,19,9,0,0)}
+    {t: KST(2026,1,19,9,0,0),untilthen: "until school starts",s: KST(2025,12,22,16,0,0)},
+    {t: KST(2026,6,4,16,0,0),untilthen: "until break",s: KST(2026,1,19,9,0,0)}
 ];
 
 // let TARGET = Date.now() + 40000;
