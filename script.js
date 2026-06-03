@@ -47,34 +47,36 @@ function KST_alt(year,month,day,hour,min,sec){
 }
 
 function formatDurationApprox(ms) {
+    const negative = ms < 0;
+    ms = Math.abs(ms);
+
     const units = [
-        { name: "y",ms: 365.2425 * 86400000,color: "#FF0000"},
-        // { name: "mth",ms: 365.2425 * 86400000 / 12,color: "#0000FF"},
-        { name: "d",ms: 86400000,color: "#ff9100"},
-        { name: "h",ms: 3600000,color: "#0000FF"},
-        { name: "m", ms: 60000,color: "#00FF00"},
-        { name: "s", ms: 1000,color: "#FF0000"}
+        { name: "y", ms: 365.2425 * 86400000, color: "#FF0000" },
+        { name: "d", ms: 86400000, color: "#ff9100" },
+        { name: "h", ms: 3600000, color: "#0000FF" },
+        { name: "m", ms: 60000, color: "#00FF00" },
+        { name: "s", ms: 1000, color: "#FF0000" }
     ];
 
-    if(ms<=0){
-        return `<h1 style="color: #FF0000">0s</h1>`;
-    }else if(ms>0 && ms<=1000*30){
-        return `<h1 style="color: #FF0000">${(ms/1000).toFixed(3)}s</h1>`;
+    if(ms <= 30000){
+        return `<h1 style="color:#FF0000">${negative ? "-" : ""}${(ms/1000).toFixed(3)}s</h1>`;
     }
 
     let result = [];
-    for (let i=0;i<units.length;i++) {
-        const unit = units[i];
 
+    if(negative){
+        result.push(`<h1 style="color:#FF0000">-</h1>`);
+    }
+
+    for(const unit of units){
         const value = Math.floor(ms / unit.ms);
-        if (value > 0) {
-            result.push(`<h1 style="color: ${unit.color}">${value}${unit.name}</h1>`);
+        if(value > 0){
+            result.push(`<h1 style="color:${unit.color}">${value}${unit.name}</h1>`);
             ms -= value * unit.ms;
         }
     }
 
-    const formatted = result.join('');
-    return formatted;
+    return result.join('');
 }
 
 const DATES = [
@@ -82,11 +84,10 @@ const DATES = [
     {t: KST(2026,6,4,4,0,0),untilthen: "until break",s: KST(2026,1,19,9,0,0)}
 ];
 
-let TARGET;
-let START;
-// const TARGET = Date.now()+1000*60;
-// const START = Date.now();
-let DURATION;
+// let TARGET = Date.now() + 40000;
+// let START = Date.now();
+// let DURATION = TARGET - START;
+let TARGET, START, DURATION;
 
 const output = document.getElementById("time");
 const pbar = document.getElementById("progress");
@@ -101,36 +102,47 @@ let prevText = null;
 let prevPercent = null;
 let prevPercentDisplay = null;
 let isProgressEnabled = true;
+let noMoreDates = false;
 
 function setTARGET(tnow){
     for(const date of DATES){
-        if(tnow<date.t){
+        if(tnow < date.t){
             TARGET = date.t;
             START = date.s;
             until.textContent = date.untilthen;
             DURATION = date.t - date.s;
-            return;
+            return true;
         }
     }
+
+    const date = DATES.at(-1);
+    TARGET = date.t;
+    START = date.s;
+    until.textContent = date.untilthen;
+    DURATION = date.t - date.s;
+
+    noMoreDates = true;
+    return false;
 }
 async function resyncTime() {
     if (isSyncing) return;
+
     isSyncing = true;
+    noMoreDates = false;
+
     output.textContent = "syncing...";
     percentd.textContent = "syncing...";
     until.textContent = "until ---";
-    pbar.style.width = `0%`;
+    pbar.style.width = "0%";
 
     baseUtcMs = await getAccurateUtcBaseMs();
     basePerfMs = performance.now();
+
     setTARGET(baseUtcMs + (performance.now() - basePerfMs));
 
     isSyncing = false;
 }
 function formatTime(ms){
-    if(ms<=0){
-        return `<h1 style="color: #FF0000">It's time</h1>`;
-    }
     return formatDurationApprox(ms);
 }
 function animateTimeChange() {
@@ -145,22 +157,24 @@ function update(forceRefresh) {
     }
     const nowUtcMs = baseUtcMs + (performance.now() - basePerfMs);
     let diffMs = TARGET - nowUtcMs;
-    if(diffMs<=0){
+    let negative = diffMs < 0;
+    if(diffMs <= 0 && !noMoreDates){
         setTARGET(nowUtcMs);
         diffMs = TARGET - nowUtcMs;
+        negative = diffMs < 0;
     }
 
     const formattedTime = formatTime(diffMs);
     if(formattedTime != prevText || forceRefresh){
         output.innerHTML = formattedTime;
         prevText = formattedTime;
-        if(diffMs>30000){
+        if(diffMs>30000 || negative){
             animateTimeChange();
         }
     }
 
     const elapsedMs = DURATION - diffMs;
-    const percentPassed = Math.min(((elapsedMs / DURATION) * 100),100);
+    const percentPassed = (elapsedMs / DURATION) * 100;
 
     const displayPercentPassed = Math.round(percentPassed);
     if(displayPercentPassed != prevPercentDisplay || forceRefresh){
