@@ -19,7 +19,7 @@ h1 {
 }
 
 span {
-    font-size: clamp(1rem, 4vw, 4rem);
+    font-size: clamp(1.3rem, 4vw, 4rem);
 }
 
 .time-anim {
@@ -48,13 +48,13 @@ body {
 }
 
 #main{
-    gap: 1rem;
+    gap: 1vh;
     flex-direction: column;
     height: 100%;
 }
 
 .hcontainer{
-    gap: 2rem;
+    gap: clamp(5px,3vw,20px);
     flex-direction: row;
 }
 
@@ -89,6 +89,6 @@ body {
     position: fixed;
     bottom: 30px;
     left: 30px;
-    font-size: clamp(10px,1.2vw,20px);
+    font-size: clamp(15px,1.2vw,20px);
     color: #7f7f7f;
 }
