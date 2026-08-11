@@ -1,6 +1,7 @@
 *{
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     color: #FFFFFF;
+    box-sizing: border-box;
 }
 
 .noselect{
@@ -12,26 +13,13 @@ h1,span,button{
     font-weight: 700;
     margin: 0;
     white-space: nowrap;
-    overflow: hidden;
 }
 h1 {
-    font-size: 12vw;
+    font-size: clamp(3rem, 12vw, 20rem);
 }
-span{
-    font-size: 4vw;
-}
-button{
-    border: 0.4vw solid #FFFFFF;
-    /* width: 7vw;
-    height: 4vw; */
-    background-color: #000000;
-    font-size: 2vw;
-    padding: 0.5vw;
-    transition: transform 0.1s ease;
-    cursor: pointer;
-}
-button:active {
-    transform: scale(0.95);
+
+span {
+    font-size: clamp(1rem, 4vw, 4rem);
 }
 
 .time-anim {
@@ -40,7 +28,7 @@ button:active {
 
 @keyframes pop {
     0% {
-        transform: translateY(3vh);
+        transform: translateY(clamp(10px,3vw,25px));
     }
     100% {
         transform: translateY(0);
@@ -60,21 +48,23 @@ body {
 }
 
 #main{
-    gap: 1vh;
+    gap: 1rem;
     flex-direction: column;
-    height: 100vh;
+    height: 100%;
 }
 
 .hcontainer{
-    gap: 2vw;
+    gap: 2rem;
     flex-direction: row;
 }
 
 .pcontainer {
-    width: 30vw;
-    height: 2vw;
-    border: 0.4vw solid #FFFFFF;
-    padding: 0.4vw;
+    --element-width: clamp(170px,30vw,600px); 
+    width: var(--element-width);
+    /* height: clamp(,,60px); */
+    height: calc(var(--element-width) * 0.12);
+    border: calc(var(--element-width) * 0.015) solid #FFFFFF;
+    padding: calc(var(--element-width) * 0.015);
     background-color: #000000;
 }
 
@@ -97,8 +87,8 @@ body {
 
 #credit {
     position: fixed;
-    bottom: 1vw;
-    left: 1vw;
-    font-size: 1.2vw;
+    bottom: 30px;
+    left: 30px;
+    font-size: clamp(10px,1.2vw,20px);
     color: #7f7f7f;
 }
