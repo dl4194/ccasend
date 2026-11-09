@@ -1,43 +1,46 @@
-async function getAccurateUtcBaseMsUnixSh() {
-    const t0 = performance.now();
+// async function getAccurateUtcBaseMsUnixSh() {
+//     const t0 = performance.now();
 
-    const res = await fetch("https://unixtime.sh/api", {
-        cache: "no-store",
-        signal: AbortSignal.timeout(800)
-    });
-    const data = await res.json();
+//     const res = await fetch("https://unixtime.sh/api", {
+//         cache: "no-store",
+//         signal: AbortSignal.timeout(800)
+//     });
+//     const data = await res.json();
 
-    const t1 = performance.now();
-    const rtt = t1 - t0;
+//     const t1 = performance.now();
+//     const rtt = t1 - t0;
 
-    return Number(data.unix.milliseconds) + rtt * 0.5;
-}
-async function getAccurateUtcBaseMsPythonAnywhere() {
-    const t0 = performance.now();
+//     return Number(data.unix.milliseconds) + rtt * 0.5;
+// }
+// async function getAccurateUtcBaseMsPythonAnywhere() {
+//     const t0 = performance.now();
 
-    const res = await fetch("https://dl4194.pythonanywhere.com/time", {
-        cache: "no-store",
-        signal: AbortSignal.timeout(800)
-    });
-    const data = await res.text();
+//     const res = await fetch("https://dl4194.pythonanywhere.com/time", {
+//         cache: "no-store",
+//         signal: AbortSignal.timeout(800)
+//     });
+//     const data = await res.text();
 
-    const t1 = performance.now();
-    const rtt = t1 - t0;
+//     const t1 = performance.now();
+//     const rtt = t1 - t0;
 
-    // actually gives in ms
-    // add half RTT to compensate network delay
-    return Number(data) + rtt * 0.5;
-}
+//     // actually gives in ms
+//     // add half RTT to compensate network delay
+//     return Number(data) + rtt * 0.5;
+// }
+// async function getAccurateUtcBaseMs(){
+//     const functions = [getAccurateUtcBaseMsUnixSh,Date.now];
+//     for(const f of functions){
+//         try{
+//             return await Promise.resolve(f());
+//         }catch(err){
+//             console.error(err);
+//         }
+//     }
+//     throw new Error("Failed to fetch time");
+// }
 async function getAccurateUtcBaseMs(){
-    const functions = [getAccurateUtcBaseMsUnixSh,Date.now];
-    for(const f of functions){
-        try{
-            return await Promise.resolve(f());
-        }catch(err){
-            console.error(err);
-        }
-    }
-    throw new Error("Failed to fetch time");
+    return Date.now();
 }
 function KST(year,month,day,hour,min,sec){
     return Date.UTC(year,month-1,day,hour,min,sec) - 9 * 60 * 60 * 1000;
